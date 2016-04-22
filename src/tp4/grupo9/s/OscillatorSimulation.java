@@ -13,6 +13,7 @@ public class OscillatorSimulation {
 			double value = Verlet.nextPosition(counter, step, p, p.m * p.getAcceleration());
 			System.out.println("counter: " + counter + " ************* position: " + value);
 			counter += step;
+			Output.getInstace().write(p, counter);
 		}
 
 	}
