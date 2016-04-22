@@ -6,6 +6,8 @@ import java.awt.Color;
 public class Particle {
 
     static int counter = 1;
+    
+    public double brx, bry; //cual era la posicion anterior de la particula
     public double rx, ry;    
     public double vx, vy;
     public double ax, ay;
@@ -66,4 +68,17 @@ public class Particle {
     public Color getC() {
 		return c;
 	}
+    
+    public double getAcceleration(){
+    	return Math.sqrt(Math.pow(ax, 2) + Math.pow(ay, 2));
+    }
+    
+    public double getPossition(){
+    	return Math.sqrt(Math.pow(rx, 2) + Math.pow(ry, 2));
+    }
+    
+    public double getVelocity(){
+    	return Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2));
+    }
+    
 }
