@@ -6,6 +6,7 @@ import java.awt.Color;
 public class Particle {
 
     static int counter = 1;
+    public Vector f;
     public double rx, ry;    
     public double vx, vy;
     public double ax, ay;
@@ -13,6 +14,7 @@ public class Particle {
     public double m;   
     private Color c;     
     public int ID;
+    public boolean checked = false;
 
     public Particle(double rx, double ry, double vx, double vy, double ax, double ay, double radius, double mass, Color color) {
         this.vx = vx;
@@ -27,6 +29,11 @@ public class Particle {
         this.ID = counter++;
     }
     
+    public Particle(int ID, double rx, double ry,double vx, double vy, double radius, double mass){
+    	this(rx,ry,vx,vy,0,0,radius,mass,Color.red);
+    	this.ID = ID;
+    }
+    
     public Particle(double r, double m,  Color c) {
     	 rx = (Math.random() * (0.5-2*r)) + r;
          ry = (Math.random() * (0.5-2*r)) + r;
@@ -37,12 +44,20 @@ public class Particle {
          this.c  = c;
          this.ID = counter++;
   	}
+    
+    public Particle(double rx, double vx, double ax, double r, double m){
+    	this(rx,0,vx,0,ax,0,r,m,Color.RED);
+    }
   
     public void move(double dt) {
         rx += vx * dt;
         ry += vy * dt;
     }
 
+    public double getDistance(Particle other){
+    	return Math.sqrt(Math.pow(this.rx-other.rx,2)+Math.pow(this.ry-other.ry, 2));
+    }
+    
     public int hashCode(){
     	return ID;
     }
@@ -66,4 +81,15 @@ public class Particle {
     public Color getC() {
 		return c;
 	}
+    
+    public void setInitVel(double L){
+    	double r = Math.sqrt(rx*rx+ry*ry);
+    	double V = L/(r*m);
+    	vx = (-ry/r)*V;
+    	vy = (rx/r)*V;
+    }
+    
+    public double getSpeed(){
+    	return Math.sqrt(vx*vx+vy*vy);
+    }
 }
