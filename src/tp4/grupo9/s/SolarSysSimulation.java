@@ -8,15 +8,14 @@ public class SolarSysSimulation {
 	
 	private static int var = 1;
 	
-	private static final double L = 0.00001;
+	private static final double L = 0.1;
 	private static final double G = 6.693*Math.pow(10,-35);
-	private static final double TOTAL_MASS = 2 * Math.pow(10, 20);
+	private static final double TOTAL_MASS = 2 * Math.pow(10, 30);
 	private static final double MAX_DIST = 100.0;
 	private static final double MIN_DIST = 10.0;
 	private static final double INTER_RAD = Math.pow(10,-2);
 	
 	private double dt, dt2;
-	Set<Particle> previous = new HashSet<>();
 	private Set<Particle> particles;
 	
 	
@@ -45,7 +44,6 @@ public class SolarSysSimulation {
 			if(!p.equals(p2)){
 				double alpha = Math.atan2((p2.ry-p.ry),p2.rx-p.rx);
 				double f = G*p.m*p2.m/Math.pow(p.getDistance(p2),2);
-				System.out.println("id: " + p.ID + " f: " + f);
 				force.x += f*Math.cos(alpha);
 				force.y += f*Math.sin(alpha);
 			}
@@ -53,35 +51,31 @@ public class SolarSysSimulation {
 		return force;
 	}
 	
-	private void beeman(Particle current, Particle prev, double time){
-		Particle next = new Particle(current.ID, 0, 0, 0, 0, current.r, current.m);
-		
-		//calculate next position
-		next.rx = current.rx + current.vx*time + (2.0/3.0)*current.f.x*time*time/current.m - (1.0/6.0)*prev.f.x*time*time/current.m;
-		next.ry = current.ry + current.vy*time + (2.0/3.0)*current.f.y*time*time/current.m - (1.0/6.0)*prev.f.y*time*time/current.m;
-		
-		//predict next vel
-		Particle predicted = new Particle(next.rx, next.ry,0,0, 0, 0,0, current.m, Color.red);
-		predicted.vx = current.vx + (3.0/2.0)*current.f.x*time/current.m-0.5*prev.f.x*time/current.m;
-		predicted.vy = current.vy + (3.0/2.0)*current.f.y*time/current.m-0.5*prev.f.y*time/current.m;
-		
-		//calculate next accel using position and predicted vel
-		next.f = getF(predicted, particles);
-		
-		//correct the next vel
-		next.vx = current.vx + (1.0/3.0)*next.f.x*time/current.m + (5.0/6.0)*current.f.x*time/current.m - (1.0/6.0)*prev.f.x*time/current.m;
-		next.vy = current.vy + (1.0/3.0)*next.f.y*time/current.m + (5.0/6.0)*current.f.y*time/current.m - (1.0/6.0)*prev.f.y*time/current.m;
-		
-		prev.rx = current.rx;
-		prev.ry = current.ry;
-		prev.vx = current.vx;
-		prev.vy = current.vy;
-		prev.f = current.f;
-		
-		current.rx = next.rx;
-		current.ry = next.ry;
-		current.vx = next.vx;
-		current.vy = next.vy;
+	private void beeman(Set<Particle> particles){
+		Set<Particle> nexts = new HashSet<>();
+		for(Particle p: particles){
+			p.next = new Particle(p.ID, 0, 0, 0, 0, p.r, p.m);
+			p.next.rx = p.rx + p.vx*dt + (2.0/3.0)*p.f.x*dt*dt/p.m - (1.0/6.0)*p.previous.f.x*dt*dt/p.m;
+			p.next.ry = p.ry + p.vy*dt + (2.0/3.0)*p.f.y*dt*dt/p.m - (1.0/6.0)*p.previous.f.y*dt*dt/p.m;
+			nexts.add(p.next);
+		}
+		for(Particle p: particles){
+			p.next.f = getF(p.next,nexts);
+		}
+		for(Particle p: particles){
+			p.next.vx = p.vx + (1.0/3.0)*p.next.f.x*dt/p.m + (5.0/6.0)*p.f.x*dt*p.m - (1.0/6.0)*p.previous.f.x*dt/p.m; 
+			p.next.vy = p.vy + (1.0/3.0)*p.next.f.y*dt/p.m + (5.0/6.0)*p.f.y*dt*p.m - (1.0/6.0)*p.previous.f.y*dt/p.m;
+			p.previous.rx = p.rx;
+			p.previous.ry = p.ry;
+			p.previous.vx = p.vx;
+			p.previous.vy = p.vy;
+			p.previous.f = p.f;
+			
+			p.rx = p.next.rx;
+			p.ry = p.next.ry;
+			p.vx = p.next.vx;
+			p.vy = p.next.vy;
+		}
 	}
 	
 	public Particle mergePar(Particle p1, Particle p2){
@@ -112,23 +106,17 @@ public class SolarSysSimulation {
 			p.f = getF(p, particles);
 			Vector prevPos = eulerPos(p,-dt);
 			Vector prevVel = eulerVel(p,-dt);
-			Particle prevPart = new Particle(p.ID,prevPos.x,prevPos.y,prevVel.x,prevVel.y,p.r,p.m);
-			previous.add(prevPart);
+			p.previous = new Particle(p.ID,prevPos.x,prevPos.y,prevVel.x,prevVel.y,p.r,p.m);
+			p.previous.f = getF(p.previous, particles);
 		}
-		// Set forces for previous
-		System.out.println("F of prev");
-		for(Particle prev: previous){
-			prev.f = getF(prev,previous);
-		}
-		System.out.println("End of prev");
 		while(time<totalTime){
 			if(printTime<=time){
+				if(time%0.1==0)
+					System.out.println(time);
 				Output.getInstace().write(particles, printTime);
 				printTime += dt2;
 			}
-			for(Particle p: particles){
-				beeman(p,getParticle(p.ID, previous),dt);
-			}
+			beeman(particles);
 			for(Particle p: particles){
 				p.f = getF(p, particles);
 			}
@@ -138,7 +126,6 @@ public class SolarSysSimulation {
 	}
 	
 	private Vector eulerPos(Particle part, double dt){
-		System.out.println(part.rx + " " + part.ry);
 		double x = part.rx + dt*part.vx + dt*dt*part.f.x/(2*part.m);
 		double y = part.ry + dt*part.vy + dt*dt*part.f.y/(2*part.m);
 		return new Vector(x,y);
@@ -174,13 +161,10 @@ public class SolarSysSimulation {
 								particles.remove(p);
 								particles.remove(p2);
 								particles.add(merged);
-								previous.remove(p);
-								previous.remove(p2);
 								p.f = getF(p,particles);
 								Vector prevPos = eulerPos(p,-dt);
 								Vector prevVel = eulerVel(p,-dt);
-								Particle prevPart = new Particle(merged.ID,prevPos.x,prevPos.y,prevVel.x,prevVel.y,p.r,p.m);
-								previous.add(prevPart);
+								merged.previous = new Particle(merged.ID,prevPos.x,prevPos.y,prevVel.x,prevVel.y,p.r,p.m);
 								break;
 							}
 						}

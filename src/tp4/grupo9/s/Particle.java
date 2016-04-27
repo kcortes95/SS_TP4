@@ -5,6 +5,7 @@ import java.awt.Color;
 
 public class Particle {
 
+	public Particle previous, next;
     static int counter = 1;
     public Vector f;
     public double rx, ry;    
