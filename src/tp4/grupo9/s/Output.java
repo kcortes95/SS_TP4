@@ -9,6 +9,7 @@ import java.util.Set;
 public class Output {
 	private static Output instance = null;
 	private static int count = 0;
+	public static String fileName = "output.xyz";
 
 	public static Output getInstace() {
 		if (instance == null)
@@ -19,13 +20,13 @@ public class Output {
 	public void write(Set<Particle> particles, double time) {
 		if (time == 0) {
 			try {
-				PrintWriter pw = new PrintWriter("output.xyz");
+				PrintWriter pw = new PrintWriter(fileName);
 				pw.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("output.xyz", true)))) {
+		try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)))) {
 			out.write((particles.size()) + "\n");
 			// comment line
 			// System.out.println("Frame : " + count++);
@@ -50,13 +51,13 @@ public class Output {
 	public void write(Particle particle, double time) {
 		if (time == 0) {
 			try {
-				PrintWriter pw = new PrintWriter("output.xyz");
+				PrintWriter pw = new PrintWriter(fileName);
 				pw.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
-		try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("output.xyz", true)))) {
+		try (PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName, true)))) {
 			out.write((1) + "\n");
 			out.write("Comment line\n");
 			out.write(particle.ID + "\t" + particle.rx + "\t" + particle.ry + "\t" + particle.r + "\t"

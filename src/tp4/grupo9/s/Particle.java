@@ -7,8 +7,10 @@ public class Particle {
 
     static int counter = 1;
     
-    public double brx, bry; //cual era la posicion anterior de la particula
-    public double rx, ry;    
+    public double brx = 0, bry= 0; //cual era la posicion anterior de la particula
+    public double rx= 0, ry= 0;    
+    public double prx= 0, pry= 0; //cual sera la posicion siguiente de la particula
+    
     public double vx, vy;
     public double ax, ay;
     public double r;    
@@ -80,5 +82,13 @@ public class Particle {
     public double getVelocity(){
     	return Math.sqrt(Math.pow(vx, 2) + Math.pow(vy, 2));
     }
+    
+    public double getRx() {
+		return rx;
+	}
+    
+    public double getRy() {
+		return ry;
+	}
     
 }
