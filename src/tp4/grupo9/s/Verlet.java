@@ -16,8 +16,9 @@ public class Verlet {
 		p.brx = p.rx;
 		p.rx = p.prx;
 		p.prx = calc1 - calc2;
-		// p.rx = calc1 - calc2;
-
+		//p.rx = calc1 - calc2;
+		//p.prx = p.rx;
+		
 		return p.rx;
 
 	}
