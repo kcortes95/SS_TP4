@@ -93,4 +93,8 @@ public class Particle {
     public double getSpeed(){
     	return Math.sqrt(vx*vx+vy*vy);
     }
+    
+    public double distanceToOrigin(){
+    	return Math.sqrt(rx*rx+ry*ry);
+    }
 }
