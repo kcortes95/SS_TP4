@@ -23,17 +23,22 @@ public abstract class Grid {
 	
 	public abstract void calculateNeighbours();
 	
-	private void insertParticles(Set<Particle> particles){
+	public void insertParticles(Set<Particle> particles){
 		for(Particle p: particles){
-			int x = (int) (Math.floor(p.rx/(L/M)));
-			int y = (int) (Math.floor(p.ry/(L/M)));
-			//Habilitar el codigo de abajo para ver las posiciones reales, y en la grilla de las particulas
-			/*
-			System.out.println("x: " + p.getPosition().getX() + " - y: " + p.getPosition().getY());
-			System.out.println("x: " + x + " - y: " + y);
-			*/
-			cells[x][y].getParticles().add(p);
+			insert(p);
 		}
+	}
+	
+	public void insert(Particle p){
+		int x = (int) (Math.floor(p.rx/(L/M))) + M/2;
+		int y = (int) (Math.floor(p.ry/(L/M))) + M/2;
+		cells[x][y].getParticles().add(p);
+	}
+	
+	public void remove(Particle p){
+		int x = (int) (Math.floor(p.rx/(L/M))) + M/2;
+		int y = (int) (Math.floor(p.ry/(L/M))) + M/2;
+		cells[x][y].getParticles().remove(p);
 	}
 	
 	public Cell getCell(int x, int y){

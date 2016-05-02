@@ -83,13 +83,6 @@ public class Particle {
 		return c;
 	}
     
-    public void setInitVel(double L){
-    	double r = Math.sqrt(rx*rx+ry*ry);
-    	double V = L/(r*m);
-    	vx = (-ry/r)*V;
-    	vy = (rx/r)*V;
-    }
-    
     public double getSpeed(){
     	return Math.sqrt(vx*vx+vy*vy);
     }
