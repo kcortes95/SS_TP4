@@ -44,4 +44,20 @@ public class Output {
 		}
 	}
 	
+	public void writeEnergies(double E, double K, double U, double time){
+		if(time == 0){
+			try{
+				PrintWriter pw = new PrintWriter("output.txt");
+				pw.close();
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("output.txt", true)))) {
+			out.write(time + "\t" + K + "\t" + U + "\t" + E + "\n");
+			out.close();
+		}catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
 }

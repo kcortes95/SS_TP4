@@ -30,7 +30,7 @@ public class SolarSysSimulation {
 		for(int i=0; i<N;){
 			double x = 2*Math.random()*MAX_DIST-MAX_DIST;
 			double y = 2*Math.random()*MAX_DIST-MAX_DIST;
-			Particle p1 = new Particle ( x, y,0,0,0,0,INTER_RAD*10/N,mass, Color.blue);
+			Particle p1 = new Particle ( x, y,0,0,0,0,MIN_DIST*10/N,mass, Color.blue);
 			if(isValidPos(p1, particles)){
 				particles.add(p1);
 				i++;
@@ -106,11 +106,13 @@ public class SolarSysSimulation {
 			p.previous = new Particle(p.ID,prevPos.x,prevPos.y,prevVel.x,prevVel.y,p.r,p.m);
 			p.previous.f = getF(p.previous);
 		}
-		while(time<totalTime){
+		while(time<=totalTime){
 			if(runs%100==0)
 				System.out.println(time);
 			if(printTime<=time){
-				Output.getInstace().write(particles, printTime);
+				double K = totalKineticEnergy(particles);
+				double U = totalPotentialEnergy(particles);
+				Output.getInstace().writeEnergies(K+U,K,U, printTime);
 				printTime += dt2;
 			}
 			for(Particle p: particles)
@@ -232,17 +234,19 @@ public class SolarSysSimulation {
     }
     
     public double totalKineticEnergy(Set<Particle> set){
-    	double E = 0;
+    	double K = 0;
     	for(Particle p: set){
-    		E += 0.5*p.m*p.getSpeed()*p.getSpeed();
+    		if(!p.equals(sun))
+    			K += 0.5*p.m*p.getSpeed()*p.getSpeed();
     	}
-    	return E;
+    	return K;
     }
     
     public double totalPotentialEnergy(Set<Particle> set){
     	double U = 0;
     	for(Particle p: set){
-    		U += -G*p.m*sun.m/p.distanceToOrigin();
+    		if(!p.equals(sun))
+    			U += -G*p.m*sun.m/p.distanceToOrigin();
     	}
     	return U;
     }
