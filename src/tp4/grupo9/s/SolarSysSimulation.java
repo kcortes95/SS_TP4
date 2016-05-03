@@ -10,7 +10,7 @@ public class SolarSysSimulation {
 	private static final double TOTAL_MASS = 2 * Math.pow(10, 30);
 	private static final double MAX_DIST = Math.pow(10, 10);
 	private static final double MIN_DIST = Math.pow(10, 9);
-	private static final double INTER_RAD = Math.pow(10,7);
+	private static final double INTER_RAD = Math.pow(10,6);
 	private static final int M = 100;
 	
 	private double dt, dt2;
@@ -30,7 +30,7 @@ public class SolarSysSimulation {
 		for(int i=0; i<N;){
 			double x = 2*Math.random()*MAX_DIST-MAX_DIST;
 			double y = 2*Math.random()*MAX_DIST-MAX_DIST;
-			Particle p1 = new Particle ( x, y,0,0,0,0,INTER_RAD,mass, Color.blue);
+			Particle p1 = new Particle ( x, y,0,0,0,0,INTER_RAD*10/N,mass, Color.blue);
 			if(isValidPos(p1, particles)){
 				particles.add(p1);
 				i++;
@@ -229,5 +229,21 @@ public class SolarSysSimulation {
     	double V = L/(r*p.m);
     	p.vx = (-p.ry/r)*V;
     	p.vy = (p.rx/r)*V;
+    }
+    
+    public double totalKineticEnergy(Set<Particle> set){
+    	double E = 0;
+    	for(Particle p: set){
+    		E += 0.5*p.m*p.getSpeed()*p.getSpeed();
+    	}
+    	return E;
+    }
+    
+    public double totalPotentialEnergy(Set<Particle> set){
+    	double U = 0;
+    	for(Particle p: set){
+    		U += -G*p.m*sun.m/p.distanceToOrigin();
+    	}
+    	return U;
     }
 }
