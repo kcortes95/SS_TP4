@@ -10,8 +10,8 @@ public class SolarSysSimulation {
 	private static final double TOTAL_MASS = 2 * Math.pow(10, 30);
 	private static final double MAX_DIST = Math.pow(10, 10);
 	private static final double MIN_DIST = Math.pow(10, 9);
-	private static final double INTER_RAD = Math.pow(10,6);
-	private static final int M = 100;
+	private static final double INTER_RAD = Math.pow(10,7);
+	private static final int M = 500;
 	
 	private double dt, dt2;
 	private Particle sun;
@@ -21,7 +21,6 @@ public class SolarSysSimulation {
 	
 	
 	public SolarSysSimulation(int N, double dt, double dt2){
-		double alpha, dist;
 		double mass = TOTAL_MASS / N;
 		this.outOfBounds = new HashSet<Particle>();
 		this.particles = new HashSet<Particle>();
@@ -30,14 +29,18 @@ public class SolarSysSimulation {
 		for(int i=0; i<N;){
 			double x = 2*Math.random()*MAX_DIST-MAX_DIST;
 			double y = 2*Math.random()*MAX_DIST-MAX_DIST;
-			Particle p1 = new Particle ( x, y,0,0,0,0,MIN_DIST*10/N,mass, Color.blue);
+			//RADIOS PARA QUE SEA VISIBLE EN OVITO
+			//N100 MIN_DIST*20/N
+			//N1000 MIN_DIST*100/N
+			//N10000 MIN_DIST*700/N
+			Particle p1 = new Particle ( x, y,0,0,0,0,MIN_DIST*700/N,mass, Color.blue);
 			if(isValidPos(p1, particles)){
 				particles.add(p1);
 				i++;
 				setInitVel(p1);
 			}
 		}
-		this.grid = new LinearGrid(2*MAX_DIST, M, particles);
+		this.grid = new LinearGrid(8*MAX_DIST, M, particles);
 		this.dt = dt;
 		this.dt2 = dt2;
 	}
@@ -108,11 +111,12 @@ public class SolarSysSimulation {
 		}
 		while(time<=totalTime){
 			if(runs%100==0)
-				System.out.println(time);
+				System.out.println((100*time/totalTime) + "%");
 			if(printTime<=time){
-				double K = totalKineticEnergy(particles);
+				/*double K = totalKineticEnergy(particles);
 				double U = totalPotentialEnergy(particles);
-				Output.getInstace().writeEnergies(K+U,K,U, printTime);
+				Output.getInstace().writeEnergies(K+U,K,U, printTime);*/
+				Output.getInstace().write(particles,time);
 				printTime += dt2;
 			}
 			for(Particle p: particles)
@@ -121,7 +125,6 @@ public class SolarSysSimulation {
 			outOfBounds.clear();
 			for(int i=0; i<grid.getM(); i++){
 				for(int j=0; j<grid.getM(); j++)
-					//while(checkMerge(grid.getCell(i, j)));
 					checkMerge(grid.getCell(i,j));
 			}
 			time += dt;
@@ -225,7 +228,7 @@ public class SolarSysSimulation {
 	 
     public void setInitVel(Particle p){
     	double k = 0, m1=p.m, m2=sun.m, r=p.distanceToOrigin(), mu=m1*m2/(m1+m2);
-    	double rand = Math.random()*0.2;
+    	double rand = Math.random()*0.5;
     	while(k==0){k=Math.random();}
     	double L = Math.sqrt((G*r*mu*m1*m2)+Math.sqrt(-G*G*(k-1)*r*r*m1*m1*m2*m2*mu*mu)*rand);
     	double V = L/(r*p.m);

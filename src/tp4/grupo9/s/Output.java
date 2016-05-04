@@ -8,7 +8,6 @@ import java.util.Set;
 
 public class Output {
 	private static Output instance = null;
-	private static int count = 0;
 	
 	public static Output getInstace(){
 		if(instance == null)
@@ -55,6 +54,40 @@ public class Output {
 		}
 		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("output.txt", true)))) {
 			out.write(time + "\t" + K + "\t" + U + "\t" + E + "\n");
+			out.close();
+		}catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
+	
+	public void writeNumberParticles(int amount, double time){
+		if(time == 0){
+			try{
+				PrintWriter pw = new PrintWriter("output.txt");
+				pw.close();
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("output.txt", true)))) {
+			out.write(time + "\t" + amount +"\n");
+			out.close();
+		}catch (IOException e) {
+		    e.printStackTrace();
+		}
+	}
+	
+	public void writeOscillate(double x, double time){
+		if(time == 0){
+			try{
+				PrintWriter pw = new PrintWriter("output.txt");
+				pw.close();
+			}catch (Exception e){
+				e.printStackTrace();
+			}
+		}
+		try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter("output.txt", true)))) {
+			out.write(time + "\t" + x +"\n");
 			out.close();
 		}catch (IOException e) {
 		    e.printStackTrace();

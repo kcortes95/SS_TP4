@@ -1,8 +1,6 @@
 package tp4.grupo9.s;
 
 import java.awt.Color;
-import java.util.HashSet;
-import java.util.Set;
 
 public class OscillatorSimulation {
 	
@@ -15,43 +13,66 @@ public class OscillatorSimulation {
 	private static final double r0 = 1;
 	private static final double v0 = -gamma/(mass/2);
 	
-	private Particle current, previous;
+	private Particle p;
 	private double tf;
 	private double t;
-	private double dt, dt2;
 	
 	public OscillatorSimulation(double tf){
-		this.current = new Particle(r0, 0, v0, 0, 0, 0, 1, mass, Color.RED);
+		this.p = new Particle(r0, 0, v0, 0, 0, 0, 1, mass, Color.RED);
 		this.tf = tf;
 		this.t = 0;
 	}
 	
-	private void beeman(Particle current, Particle previous, double time){
-		Particle next = new Particle(1, mass, Color.RED);
+	private void beeman(double time){
+		p.next = new Particle(1, mass, Color.RED);
 		
 		//calculate next position
-		next.rx = current.rx + current.vx*time + (2.0/3.0)*current.ax*time*time - (1.0/6.0)*previous.ax*time*time;
+		p.next.rx = p.rx + p.vx*time + (2.0/3.0)*p.ax*time*time - (1.0/6.0)*p.ax*time*time;
 		
 		//predict next vel
-		Particle predicted = new Particle(next.rx, 0, 0, 1, mass);
-		predicted.vx = current.vx + (3.0/2.0)*current.ax*time-0.5*previous.ax*time;
+		Particle predicted = new Particle(p.next.rx, 0, 0, 1, mass);
+		predicted.vx = p.vx + (3.0/2.0)*p.ax*time-0.5*p.ax*time;
 		
 		//calculate next accel using position and predicted vel
-		next.ax = getAccel(predicted);
+		p.next.ax = getAccel(predicted);
 		
 		//correct the next vel
-		next.vx = current.vx + (1.0/3.0)*next.ax*time + (5.0/6.0)*current.ax*time - (1.0/6.0)*previous.ax*time;
+		p.next.vx = p.vx + (1.0/3.0)*p.next.ax*time + (5.0/6.0)*p.ax*time - (1.0/6.0)*p.ax*time;
 		
-		previous = current;
-		current = next;
+		p.previous.rx = p.rx;
+		p.previous.vx = p.vx;
+		p.previous.ax = p.ax;
+		
+		p.rx = p.next.rx;
+		p.vx = p.next.vx;
+		p.ax = getAccel(p.next);
 	}
 	
-	private void velVerlet(double time){
-		previous = current;
+	private void verlet(double dt){
+		p.next = new Particle(1, mass, Color.red);
 		
-		current.rx = previous.rx + time*previous.vx + time*time*getAccel(previous);
+		p.next.rx = 2*p.rx - p.previous.rx + dt*dt*p.ax;
 		
+		// Predict next vel
+		p.next.vx = p.vx + (3.0/2.0)*p.ax*dt-0.5*p.previous.ax*dt;
 		
+		p.next.ax = getAccel(p.next);
+		
+		double nextnextRx = 2*p.next.rx - p.rx + dt*dt*p.next.ax;
+		
+		p.next.vx = (nextnextRx-p.next.rx)/(2*dt);
+		
+		p.previous.rx = p.rx;
+		p.previous.vx = p.vx;
+		p.previous.ax = p.ax;
+		
+		p.rx = p.next.rx;
+		p.vx = p.next.vx;
+		p.ax = getAccel(p.next);
+	}
+	
+	private double exactSol(double time){
+		return Math.pow(Math.E, -(gamma*time/(2*mass)))*Math.cos(Math.sqrt(k/mass-gamma*gamma/(4*mass*mass))*time);
 	}
 	
 	private double getF(Particle part){
@@ -63,23 +84,29 @@ public class OscillatorSimulation {
 	}
 	
 	public void simulate(double dt, double dt2){
+		int counter = 0;
+		double difference = 0;
 		if(dt>dt2 || dt<=0)
 			throw new IllegalArgumentException();
-		this.dt = dt;
-		this.dt2 = dt2;
 		double printCounter = 0;
 		
-		previous = new Particle(eulerPos(current,-dt), eulerVel(current,-dt), 0, 1, mass);
-		previous.ax = getAccel(previous);
+		p.ax = getAccel(p);
+		
+		p.previous = new Particle(eulerPos(p,-dt), eulerVel(p,-dt), 0, 1, mass);
+		p.previous.ax = getAccel(p.previous);
 		
 		while(t<tf){
-			//beeman(dt);
+			difference += Math.pow(p.rx - exactSol(t),2);
+			verlet(dt);
+			
 			if(dt2*printCounter<=t){
-				//Output.getInstace().write(current, t);
+				Output.getInstace().writeOscillate(exactSol(t), t);
 				printCounter++;
 			}
 			t+=dt;
+			counter ++;
 		}
+		System.out.println(difference/counter);
 	}
 	
 	private double eulerPos(Particle part, double dt){
@@ -92,7 +119,7 @@ public class OscillatorSimulation {
 	
 	
 	public static void main(String[] args) {
-		OscillatorSimulation os = new OscillatorSimulation(50);
-		os.simulate(0.01, 0.1);
+		OscillatorSimulation os = new OscillatorSimulation(10);
+		os.simulate(0.001, 0.01);
 	}
 }
